@@ -104,29 +104,35 @@
           this.state = {
             users: []
           }
+          this.addUser = this.addUser.bind(this)
         }
         componentDidMount(){
           db.read()
             .then(users => this.setState({ users }))
         }
+
+        addUser (user) {
+          this.setState({users: [...this.state.users, user]})
+        }
+
         render(){
-          const state = this.state;
           return(
               <div>
                 <h1>Acme Users CRUD</h1>
-                <Nav state={state}/>
+                <Nav state={this.state} addUser={this.addUser}/>
               </div>
           );
         }
       }
 
-      const Nav = ({state}) => {
+      const Nav = (props) => {
         return (
           <HashRouter>
             <Link to='/home'>Home</Link>
-            <Link to='/users'>Users ({state.users.length}) Admins (0)</Link>
+            <Link to='/users'>Users ({props.state.users.length}) Admins (0)</Link>
             <Route path='/home' component={Home}/>
-            <Route path='/users' component={Users}/>
+            <Route path='/users' render={()=><Users state={props.state} addUser={props.addUser}/>}/>
+            <Route path='/users'  render={()=><UsersList state={props.state}/>}/>
           </HashRouter>
         )
       }
@@ -155,7 +161,7 @@
         handleSubmit (event) {
           event.preventDefault();
           this.setState({[event.target.name]: event.target.value})
-          console.log(this.state)
+          this.props.addUser(this.state)
         }
 
         render() {
@@ -177,19 +183,25 @@
         }
       }
 
-      const UsersList = () => {
-
+      const UsersList = (props) => {
+        return (
+          <div>
+            {props.state.users.map(user => <Link to={`/users/${user.name}`}>{user.name}</Link>)}
+          </div>
+        )
       }
 
       class UpdateUser extends React.Component {
 
       }
 
-      const Users = () => {
+      const Users = (props) => {
+          //console.log(props)
           return (
             <div>
               <h1>Users</h1>
-              <CreateUser />
+              <CreateUser state={props.state} addUser={props.addUser}/>
+              <UsersList state={props.state}/>
             </div>
           )
         }
