@@ -97,11 +97,12 @@
     <script type='text/babel'>
       const root = document.querySelector('#root');
       const db = new DB('users');
+      const {HashRouter, Route, Link} = ReactRouterDOM;
       class App extends React.Component{
         constructor(){
           super();
           this.state = {
-            users: 0
+            users: []
           }
         }
         componentDidMount(){
@@ -109,10 +110,89 @@
             .then(users => this.setState({ users }))
         }
         render(){
-          return( <div>{this.state.users.length}</div>
+          const state = this.state;
+          return(
+              <div>
+                <h1>Acme Users CRUD</h1>
+                <Nav state={state}/>
+              </div>
           );
         }
       }
+
+      const Nav = ({state}) => {
+        return (
+          <HashRouter>
+            <Link to='/home'>Home</Link>
+            <Link to='/users'>Users ({state.users.length}) Admins (0)</Link>
+            <Route path='/home' component={Home}/>
+            <Route path='/users' component={Users}/>
+          </HashRouter>
+        )
+      }
+
+      const Home = () => {
+        return (
+          <h1>Home</h1>
+        )
+      }
+
+      class CreateUser extends React.Component {
+        constructor () {
+          super()
+          this.state = {
+            name: '',
+            admin: false
+          }
+          this.handleChange = this.handleChange.bind(this)
+          this.handleSubmit = this.handleSubmit.bind(this)
+        }
+
+        handleChange (event) {
+          this.setState({[event.target.name]: event.target.value})
+        }
+
+        handleSubmit (event) {
+          event.preventDefault();
+          this.setState({[event.target.name]: event.target.value})
+          console.log(this.state)
+        }
+
+        render() {
+          return (
+            <div>
+              <h2>Create a User</h2>
+              <form onSubmit={this.handleSubmit}>
+                <label>
+                  <input type='text' name='name' value={this.state.name} onChange={this.handleChange}/>
+                </label>
+                <label>
+                  Is Admin
+                  <input type='checkbox' name='admin' onChange={this.handleChange} checked={this.state.admin}/>
+                </label>
+                <button type='submit'>Create</button>
+              </form>
+            </div>
+          )
+        }
+      }
+
+      const UsersList = () => {
+
+      }
+
+      class UpdateUser extends React.Component {
+
+      }
+
+      const Users = () => {
+          return (
+            <div>
+              <h1>Users</h1>
+              <CreateUser />
+            </div>
+          )
+        }
 
 
       ReactDOM.render(<App />, root);
